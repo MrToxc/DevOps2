@@ -1,5 +1,7 @@
 name: Weather report
 on:
+  schedule:
+    cron: "55 * * * *"
   push:
     branches: [main]
   workflow_dispatch:
@@ -9,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        city: ["Mumbai", "Bejing", "London"]
+        city: ["Mumbai", "Bejing", "London", "Prague"]
     steps:
       - name: Fetch weather
         run: |
@@ -20,5 +22,4 @@ jobs:
 
           echo "## $CITY Weather" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "## $CITY Weather" >> $GITHUB_STEP_SUMMARY
-          
+          echo "weather in $CITY: $WEATHER" > weather.txt
