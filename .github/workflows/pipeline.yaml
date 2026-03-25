@@ -1,16 +1,10 @@
 name: Weather report
 on:
   schedule:
-    - cron: "57 * * * *"
+    - cron: "16 * * * *"
   push:
     branches: [main]
   workflow_dispatch:
-
-# Add permissions so the bot can deploy to Pages
-permissions:
-  contents: read
-  pages: write
-  id-token: write
 
 jobs:
   weather:
@@ -23,22 +17,15 @@ jobs:
         run: |
           CITY="${{ matrix.city }}"
           WEATHER=$(curl -s "wttr.in/$CITY?format=3")
-          # Create a folder for our website files
-          mkdir -p public
-          echo "<h1>Weather for $CITY</h1><p>$WEATHER</p>" > public/${CITY}.html
+          echo "Current weather in $CITY: $WEATHER"
+          
+          # Put the file in a city-specific folder to avoid conflicts
+          mkdir -p output
+          echo "Weather in $CITY: $WEATHER" > output/${CITY}.txt
 
-      - name: Upload for Pages
-        uses: actions/upload-pages-artifact@v3
+      - name: Upload Unique Artifact
+        uses: actions/upload-artifact@v4
         with:
-          path: public/
-
-  deploy:
-    needs: weather # Wait for all 4 cities to finish
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          # This name MUST be unique per matrix row
+          name: report-${{ matrix.city }}
+          path: output/
